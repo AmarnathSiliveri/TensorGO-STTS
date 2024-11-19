@@ -64,49 +64,36 @@ def text_to_speech(text):
 # Streamlit app
 def main():
     # Page setup
-    st.set_page_config(page_title="AmarGPT 🦅", layout="wide")
-    st.header(" Based on Gemini LLM Application")
-    st.write("This app integrates speech recognition, the Gemini API, and text-to-speech capabilities.")
+    st.set_page_config(page_title="Voice Interaction with Gemini LLM", layout="wide")
+    st.header("🦅 Gemini LLM Voice Interaction")
+    st.write("This app integrates voice input and output with the Gemini API.")
 
     # Initialize session state for chat history
     if 'chat_history' not in st.session_state:
         st.session_state['chat_history'] = []
 
-    # Input method selection
-    st.subheader("Choose Input Method")
-    input_method = st.radio("How would you like to provide input?", ("Microphone", "Type Text"))
+    # Instructions for the user
+    st.subheader("Start Speaking or Type Your Question")
+    st.write("Press the button below to start speaking.")
 
-    tts_engine = initialize_tts_engine()  # Initialize TTS engine
+    # Button to start voice input
+    if st.button("Start Voice Interaction"):
+        # Get speech input
+        spoken_text = speech_to_text()
 
-    # Handle input from Microphone
-    if input_method == "Microphone":
-        if st.button("🎤 Start Speaking"):
-            spoken_text = speech_to_text()
-            if spoken_text:
-                st.write(f"🗣 You said: {spoken_text}")
-                response = get_gemini_response(spoken_text)
-
-                # Display and speak the response
-                st.success("The Response is:")
-                for chunk in response:
-                    st.write(chunk.text)
-                    st.session_state['chat_history'].append(("BOT", chunk.text))
-                    text_to_speech(tts_engine, chunk.text)
-
-    # Handle typed input
-    elif input_method == "Type Text":
-        input_text = st.text_input("Type your question here:", key="input")
-        submit_button = st.button("Ask the Question")
-        if submit_button and input_text:
-            st.write(f"🗣 You typed: {input_text}")
-            response = get_gemini_response(input_text)
+        if spoken_text:
+            # Get response from Gemini API
+            response = get_gemini_response(spoken_text)
 
             # Display and speak the response
             st.success("The Response is:")
             for chunk in response:
                 st.write(chunk.text)
                 st.session_state['chat_history'].append(("BOT", chunk.text))
-                text_to_speech(tts_engine, chunk.text)
+
+                # Generate and play the TTS
+                audio_path = text_to_speech(chunk.text)
+                st.audio(audio_path, format="audio/mp3")
 
     # Display chat history
     st.subheader("Chat History")
