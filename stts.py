@@ -5,6 +5,7 @@ import pyttsx3
 #import os
 import google.generativeai as genai
 import json
+from gtts import gTTS
 #from dotenv import load_dotenv
 
 # Load environment variables
@@ -53,10 +54,12 @@ def get_gemini_response(question):
     return response
 
 # Function for text-to-speech conversion
-def text_to_speech(engine, text):
-    if engine:
-        engine.say(text)
-        engine.runAndWait()
+def text_to_speech(text):
+    tts = gTTS(text=text, lang='en')
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file_path = temp_file.name + ".mp3"
+        tts.save(temp_file_path)
+        return temp_file_path
 
 # Streamlit app
 def main():
@@ -71,14 +74,14 @@ def main():
 
     # Input method selection
     st.subheader("Choose Input Method")
-    input_method = st.radio("How would you like to provide input?", ("Microphone", "Type Text"))
+    input_method = st.radio("How would you like to provide input?", ("Upload Audio", "Type Text"))
 
-    tts_engine = initialize_tts_engine()  # Initialize TTS engine
-
-    # Handle input from Microphone
-    if input_method == "Microphone":
-        if st.button("🎤 Start Speaking"):
-            spoken_text = speech_to_text()
+    # Handle input from Audio File Upload
+    if input_method == "Upload Audio":
+        audio_file = st.file_uploader("Upload an audio file (wav, mp3, etc.)", type=["wav", "mp3"])
+        if audio_file:
+            st.audio(audio_file, format="audio/mp3")
+            spoken_text = speech_to_text(audio_file)
             if spoken_text:
                 st.write(f"🗣 You said: {spoken_text}")
                 response = get_gemini_response(spoken_text)
@@ -88,7 +91,9 @@ def main():
                 for chunk in response:
                     st.write(chunk.text)
                     st.session_state['chat_history'].append(("BOT", chunk.text))
-                    text_to_speech(tts_engine, chunk.text)
+                    # Generate and play the TTS
+                    audio_path = text_to_speech(chunk.text)
+                    st.audio(audio_path, format="audio/mp3")
 
     # Handle typed input
     elif input_method == "Type Text":
@@ -103,7 +108,9 @@ def main():
             for chunk in response:
                 st.write(chunk.text)
                 st.session_state['chat_history'].append(("BOT", chunk.text))
-                text_to_speech(tts_engine, chunk.text)
+                # Generate and play the TTS
+                audio_path = text_to_speech(chunk.text)
+                st.audio(audio_path, format="audio/mp3")
 
     # Display chat history
     st.subheader("Chat History")
@@ -112,6 +119,7 @@ def main():
             st.write(f"🗣 **{speaker}**: {message}")
         else:
             st.write(f"🤖 **{speaker}**: {message}")
+
 
 if __name__ == "__main__":
     main()
