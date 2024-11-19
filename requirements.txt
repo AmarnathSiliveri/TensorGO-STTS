@@ -1,6 +1,5 @@
 streamlit 
 speechrecognition 
 pyttsx3 
-requests 
 python-dotenv
 google.generativeai
