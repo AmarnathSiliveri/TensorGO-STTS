@@ -3,4 +3,3 @@ speechrecognition
 pyttsx3 
 python-dotenv
 google.generativeai
-espeak
