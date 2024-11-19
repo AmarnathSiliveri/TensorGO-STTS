@@ -4,4 +4,3 @@ pyttsx3
 python-dotenv
 google-generativeai
 gTTS
-pyaudio
