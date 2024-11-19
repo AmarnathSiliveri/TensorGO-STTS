@@ -1,7 +1,7 @@
-streamlit 
-speechrecognition 
-pyttsx3 
+streamlit
+SpeechRecognition
+pyttsx3
 python-dotenv
-google.generativeai
+google-generativeai
 gTTS
 pyaudio
