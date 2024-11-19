@@ -65,12 +65,8 @@ def text_to_speech(text):
 def main():
     # Page setup
     st.set_page_config(page_title="AmarGPT 🦅", layout="wide")
-    st.header("𝐀𝐦𝐚𝐫𝐆𝐏𝐓 🦅 based on Gemini LLM Application")
+    st.header(" Based on Gemini LLM Application")
     st.write("This app integrates speech recognition, the Gemini API, and text-to-speech capabilities.")
-
-    # Load and display Lottie animation
-    lottie_hi = load_lottiefiles("higpt.json")  # Ensure you have this JSON file in the directory
-    st_lottie(lottie_hi, loop=True, quality="high", speed=1.65, height=450)
 
     # Initialize session state for chat history
     if 'chat_history' not in st.session_state:
