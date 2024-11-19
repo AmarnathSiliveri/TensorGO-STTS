@@ -64,9 +64,13 @@ def text_to_speech(text):
 # Streamlit app
 def main():
     # Page setup
-    st.set_page_config(page_title="STTS", layout="wide")
-    st.header("🦅 Based on Gemini LLM Application")
+    st.set_page_config(page_title="AmarGPT 🦅", layout="wide")
+    st.header("𝐀𝐦𝐚𝐫𝐆𝐏𝐓 🦅 based on Gemini LLM Application")
     st.write("This app integrates speech recognition, the Gemini API, and text-to-speech capabilities.")
+
+    # Load and display Lottie animation
+    lottie_hi = load_lottiefiles("higpt.json")  # Ensure you have this JSON file in the directory
+    st_lottie(lottie_hi, loop=True, quality="high", speed=1.65, height=450)
 
     # Initialize session state for chat history
     if 'chat_history' not in st.session_state:
@@ -74,14 +78,14 @@ def main():
 
     # Input method selection
     st.subheader("Choose Input Method")
-    input_method = st.radio("How would you like to provide input?", ("Upload Audio", "Type Text"))
+    input_method = st.radio("How would you like to provide input?", ("Microphone", "Type Text"))
 
-    # Handle input from Audio File Upload
-    if input_method == "Upload Audio":
-        audio_file = st.file_uploader("Upload an audio file (wav, mp3, etc.)", type=["wav", "mp3"])
-        if audio_file:
-            st.audio(audio_file, format="audio/mp3")
-            spoken_text = speech_to_text(audio_file)
+    tts_engine = initialize_tts_engine()  # Initialize TTS engine
+
+    # Handle input from Microphone
+    if input_method == "Microphone":
+        if st.button("🎤 Start Speaking"):
+            spoken_text = speech_to_text()
             if spoken_text:
                 st.write(f"🗣 You said: {spoken_text}")
                 response = get_gemini_response(spoken_text)
@@ -91,9 +95,7 @@ def main():
                 for chunk in response:
                     st.write(chunk.text)
                     st.session_state['chat_history'].append(("BOT", chunk.text))
-                    # Generate and play the TTS
-                    audio_path = text_to_speech(chunk.text)
-                    st.audio(audio_path, format="audio/mp3")
+                    text_to_speech(tts_engine, chunk.text)
 
     # Handle typed input
     elif input_method == "Type Text":
@@ -108,9 +110,7 @@ def main():
             for chunk in response:
                 st.write(chunk.text)
                 st.session_state['chat_history'].append(("BOT", chunk.text))
-                # Generate and play the TTS
-                audio_path = text_to_speech(chunk.text)
-                st.audio(audio_path, format="audio/mp3")
+                text_to_speech(tts_engine, chunk.text)
 
     # Display chat history
     st.subheader("Chat History")
